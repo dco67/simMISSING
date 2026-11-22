@@ -1,0 +1,114 @@
+# Diagnostics de qualité d'une imputation {#sec-qualite-imputation}
+
+En simulation, on juge une méthode en la confrontant à la vérité. Sur de vraies
+données, cette vérité n'existe pas : les valeurs manquantes le restent. Comment,
+alors, s'assurer qu'une imputation est raisonnable ? Ce chapitre présente trois
+diagnostics qui ne demandent aucune vérité de référence. Il correspond au sous-onglet
+**Qualité de l'imputation** de l'onglet **Évaluer et valider**.
+
+## Observé contre imputé
+
+Une imputation raisonnable produit des valeurs **plausibles** : dans le même registre
+que les valeurs observées, sans aberrations évidentes. On superpose donc la
+distribution des valeurs observées à celles des valeurs imputées, jeu par jeu. Cette
+comparaison est un contrôle de cohérence, non un test de validité : une distribution
+imputée jolie peut encore provenir d'un modèle mal choisi.
+
+::: {.callout-note}
+Un **décalage systématique** entre observé et imputé n'est pas anormal : sous MAR,
+c'est même le signe que l'imputation corrige le biais en exploitant les variables
+observées (par exemple, si les valeurs manquantes de $X_1$ correspondaient à des
+$X_2$ élevés). Ce qui alerterait, ce sont des valeurs **hors échelle** ou une forme
+radicalement différente.
+:::
+
+::: {.app}
+**À l'application —** Onglet **Évaluer et valider**, sous-onglet **Qualité de
+l'imputation**. Réglez la *Variable imputée à examiner* sur $X_1$, lancez, puis lisez
+la carte *1. Valeurs observées vs imputées*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** Les densités imputées (fines) restent dans le **registre**
+des observées (épaisse) : même forme, même échelle. Un léger décalage est normal sous
+MAR — pas une aberration. Ce sont des valeurs hors échelle qui devraient inquiéter.
+:::
+
+## La convergence de l'algorithme
+
+L'imputation par équations chaînées procède par **itérations** : elle impute variable
+par variable, en cycles répétés. Il faut vérifier que ces cycles se sont
+**stabilisés**. On suit, au fil des itérations, une quantité résumée des valeurs
+imputées (par exemple leur moyenne), avec une courbe par chaîne. Des chaînes qui
+s'entrelacent autour d'un niveau stable, sans dérive ni oscillation persistante,
+indiquent une convergence satisfaisante. Une tendance nette, ou des chaînes qui ne se
+mélangent pas, appelleraient davantage d'itérations ou un modèle d'imputation revu.
+
+::: {.app}
+**À l'application —** Carte *2. Convergence de l'algorithme* du même sous-onglet.
+Faites glisser le nombre d'*Itérations* de l'algorithme.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** Les chaînes doivent **s'entrelacer** autour d'un niveau
+stable, sans dérive. Réduisez le nombre d'itérations à une poignée : les chaînes n'ont
+pas fini de se mélanger. Remontez-le : elles se stabilisent.
+:::
+
+## L'effet du nombre d'imputations
+
+Combien d'imputations retenir ? On suit l'estimation d'intérêt — par exemple la
+moyenne de $X_1$ — et son erreur-type à mesure que $m$ augmente, en appliquant les
+règles de Rubin de façon cumulative. Deux comportements se dégagent : l'estimation
+ponctuelle se stabilise **vite**, tandis que l'erreur-type se stabilise **plus
+lentement**. C'est ce qui justifie de ne pas se contenter d'un tout petit $m$ dès lors
+qu'on rapporte des intervalles de confiance ou des tests.
+
+::: {.app}
+**À l'application —** Carte *3. Effet du nombre d'imputations*. Faites varier le
+*Nombre d'imputations (m)*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** L'estimation ponctuelle se fige rapidement ; la bande
+d'incertitude, elle, continue de se resserrer pour de plus grands $m$. C'est pourquoi
+un tout petit $m$ suffit pour un point, mais pas pour un intervalle honnête.
+:::
+
+## Une liste de vérifications
+
+Avant de faire confiance à une imputation, on s'assure que :
+
+- les valeurs imputées restent **dans le registre** des valeurs observées (densités) ;
+- les chaînes ont **convergé** (traces stables, bien mélangées) ;
+- l'estimation et son erreur-type sont **stables** pour le $m$ retenu ;
+- le modèle d'imputation inclut bien les variables liées au manque et à l'analyse
+  visée — sans quoi l'hypothèse MAR serait compromise.
+
+## Lire l'écran : trois diagnostics, aucune garantie automatique
+
+| Carte | Ce qu'elle peut rassurer | Signal d'alerte | Ce qu'elle ne valide pas |
+|---|---|---|---|
+| **Observées vs imputées** | Les imputations sont sur une échelle et dans une plage plausibles. | Valeurs impossibles, hors plage ou forme incohérente. | L'hypothèse MAR ou l'absence de biais. |
+| **Convergence de l'algorithme** | Les chaînes ne dérivent plus et se mélangent raisonnablement. | Tendance durable, chaînes séparées, oscillations persistantes. | Le caractère correct du modèle d'imputation après convergence. |
+| **Effet du nombre d'imputations** | Le choix de $m$ donne des résultats numériquement stables. | Estimation ou erreur-type qui continue de bouger fortement. | La pertinence substantive des variables incluses. |
+
+Ces diagnostics n'ont donc pas le statut d'un feu vert unique. Une imputation est
+défendable lorsqu'ils s'ajoutent à un modèle riche, construit à partir de la question
+d'analyse et de la connaissance du processus de collecte.
+
+## Exercices {.unnumbered}
+
+**8.1** *(Qualité de l'imputation.)* Réglez le nombre d'itérations sur 2, puis sur 20.
+Les traces de convergence paraissent-elles stabilisées dans le premier cas ? Que
+change le passage à 20 ? *(Solution : @sec-sol-qualite.)*
+
+**8.2** *(Qualité de l'imputation.)* Sur la carte observé/imputé, comparez un
+mécanisme MAR (piloté par $X_2$) à un mécanisme MCAR. Sous lequel le décalage entre
+observé et imputé disparaît-il, et pourquoi ce décalage est-il, sous MAR, un signe
+sain plutôt qu'un défaut ?
+
+**8.3** L'estimation ponctuelle d'une moyenne se stabilise dès un petit $m$. Pensez-vous
+que l'erreur-type d'un **coefficient de régression** se stabilise aussi vite que celle
+d'une moyenne, ou plus lentement ? Justifiez à partir de la part de variance
+inter-imputation $B$ que chaque quantité comporte.

@@ -1,0 +1,108 @@
+project:
+  type: book
+  output-dir: _book
+
+lang: fr
+
+book:
+  title: "Analyse des données manquantes"
+  subtitle: "Guide de laboratoire de l'application simManquant"
+  author: "Daniel Coulombe"
+  downloads: [pdf, epub]
+  date: today
+  date-format: "D MMMM YYYY"
+  search: true
+  sidebar:
+    style: docked
+    collapse-level: 2
+  page-footer:
+    left: "Analyse des données manquantes — dcstats.org"
+    right: "Rédigé avec Quarto"
+  chapters:
+    - index.qmd
+    - part: "Comprendre le manque"
+      chapters:
+        - 01-introduction.qmd
+        - 02-mecanismes.qmd
+        - 03-simuler-visualiser.qmd
+    - part: "Diagnostiquer le manque"
+      chapters:
+        - 04-diagnostic-little.qmd
+    - part: "Traiter le manque"
+      chapters:
+        - 05-cas-complets-imputation-simple.qmd
+        - 06-imputation-multiple.qmd
+        - 07-fiml.qmd
+    - part: "Évaluer et valider"
+      chapters:
+        - 08-etude-simulation.qmd
+        - 09-qualite-imputation.qmd
+        - 10-sensibilite-mnar.qmd
+    - part: "En pratique"
+      chapters:
+        - 11-exemple-guide.qmd
+        - 12-donnees-reelles.qmd
+        - 13-autres.qmd
+    - 14-conclusion.qmd
+    - glossaire.qmd
+    - references.qmd
+  appendices:
+    - A-solutionnaire.qmd
+
+bibliography: references.bib
+csl: apa.csl
+link-citations: true
+reference-location: document
+
+crossref:
+  fig-title: "Figure"
+  tbl-title: "Tableau"
+  fig-prefix: "figure"
+  tbl-prefix: "tableau"
+  eq-prefix: "équation"
+
+language:
+  crossref-ch-prefix: "chapitre"
+  crossref-sec-prefix: "section"
+  title-block-author-single: "Auteur"
+
+filters:
+  - encadres.lua
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    fig-align: center
+    df-print: kable
+    link-external-newwindow: true
+  pdf:
+    documentclass: scrbook
+    geometry:
+      - top=2.2cm
+      - bottom=2.2cm
+      - left=2.4cm
+      - right=2.4cm
+    papersize: letter
+    pdf-engine: lualatex
+    include-in-header: preamble.tex
+    include-before-body: cover.tex
+    number-sections: true
+    fig-pos: "H"
+    keep-tex: false
+    df-print: kable
+  epub:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    css: styles.css
+    cover-image: cover.png
+
+execute:
+  freeze: auto
+  echo: false
+  warning: false
+  message: false

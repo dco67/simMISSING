@@ -1,0 +1,137 @@
+# Autres sujets {#sec-autres}
+
+```{r}
+#| include: false
+source("_setup.R")
+```
+
+Le cœur du manuel s'est concentré sur des variables continues et sur l'imputation
+multiple. Deux compléments méritent d'être abordés pour aller vers la pratique
+réelle : l'imputation de variables catégorielles et le choix du modèle d'imputation.
+
+## Imputer des variables catégorielles et mixtes
+
+Les données réelles mêlent souvent variables continues, binaires et nominales.
+L'imputation par équations chaînées gère ces types nativement : elle choisit une
+méthode adaptée à **chaque** variable — l'appariement prédictif pour le continu, la
+régression logistique pour le binaire, la régression polytomique pour le nominal, la
+régression ordinale pour l'ordonné [@vanbuuren2011]. Le résultat respecte la nature
+de chaque variable : une variable catégorielle reste catégorielle, avec ses modalités
+d'origine, et aucune case n'est laissée manquante.
+
+::: {.callout-note}
+Il faut vérifier que les variables catégorielles sont bien déclarées **comme des
+catégories**, et contrôler la méthode que le logiciel leur attribue. Une variable
+nominale codée 1, 2, 3, ou une échelle ordinale mal déclarée, peut être traitée comme
+continue. Avec l'appariement prédictif, les valeurs imputées restent des valeurs
+observées (1, 2 ou 3), mais le modèle ignore la nature catégorielle de la variable;
+avec une méthode de régression linéaire, il peut produire des valeurs intermédiaires
+sans sens, comme 1,7. La règle pratique est de vérifier le type, les modalités
+admises et la méthode d'imputation avant de lancer l'analyse.
+:::
+
+L'application simManquant ne génère que des variables continues; le jeu *nhanes* de
+l'onglet **Données réelles** contient toutefois deux variables codées numériquement
+qui sont, en fait, catégorielles (le groupe d'âge et l'hypertension).
+
+## Choisir le modèle d'imputation
+
+La décision la plus lourde de conséquences n'est pas la méthode, mais le **choix des
+variables** entrant dans le modèle d'imputation. Trois principes guident ce choix.
+
+D'abord, le modèle d'imputation doit être **au moins aussi riche** que le modèle
+d'analyse : toute variable de l'analyse — y compris les termes d'interaction et les
+variables de résultat — doit y figurer, faute de quoi les relations d'intérêt seraient
+atténuées.
+
+Ensuite, on ajoute des **variables auxiliaires** : des variables absentes de l'analyse
+finale mais corrélées aux valeurs manquantes ou au fait de manquer
+[@collins2001; @graham2009]. Elles rendent l'hypothèse MAR plus plausible et réduisent
+le biais. L'effet peut être spectaculaire : omettre la variable qui gouverne le manque
+laisse l'imputation biaisée, tandis que l'inclure fait pratiquement disparaître le
+biais. C'est exactement la leçon du prédicteur du manque (@sec-intro-predicteur).
+
+La @fig-auxiliaire chiffre cette leçon. Plus l'auxiliaire est corrélée à la variable
+amputée, plus il y a de biais à corriger — et plus son inclusion est décisive.
+
+```{r}
+#| label: fig-auxiliaire
+#| fig-cap: "Biais de la moyenne de $X_1$ (moyenne sur 200 jeux de 500 lignes, 35 % de $X_1$ manquantes) quand le manque dépend d'une variable auxiliaire $Z$ observée, selon la corrélation entre $Z$ et $X_1$. Les cas complets, et une imputation qui oublie $Z$, gardent un biais qui croît avec la corrélation. L'imputation par régression qui inclut $Z$ reste sans biais, quelle que soit la corrélation."
+#| fig-width: 7
+#| fig-height: 4
+#| cache: true
+rs <- c(0, 0.2, 0.4, 0.6, 0.8)
+res <- do.call(rbind, lapply(rs, function(r) {
+  b <- t(sapply(1:200, function(k) {
+    set.seed(7000 + k)
+    z <- rnorm(500); x1 <- r * z + sqrt(1 - r^2) * rnorm(500)
+    m <- runif(500) < p_manque(z, 3)
+    xo <- x1; xo[m] <- NA
+    cc <- mean(xo, na.rm = TRUE)
+    fit <- lm(xo ~ z); avec <- mean(ifelse(m, predict(fit, data.frame(z = z)), xo))
+    c(cc = cc - mean(x1), sans = cc - mean(x1), avec = avec - mean(x1))
+  }))
+  data.frame(r = r, meth = c("Cas complets", "Imputation sans Z", "Imputation avec Z"),
+             biais = colMeans(b))
+}))
+res$meth <- factor(res$meth, levels = c("Cas complets", "Imputation sans Z", "Imputation avec Z"))
+ggplot(res, aes(r, biais, colour = meth, linetype = meth)) +
+  geom_hline(yintercept = 0, colour = GRIS) +
+  geom_line(linewidth = 1.1) + geom_point(size = 2.3) +
+  scale_colour_manual(values = c(GRIS, COUL_NA, COUL_OBS), name = NULL) +
+  scale_linetype_manual(values = c("solid", "dashed", "solid"), name = NULL) +
+  sx_fr(breaks = rs) + sy_fr() +
+  labs(x = "Corrélation entre l'auxiliaire Z et X1", y = "Biais moyen de la moyenne de X1")
+```
+
+Sans aucune autre variable dans le modèle, une imputation qui oublie $Z$ revient à
+imputer par la moyenne observée : elle hérite exactement du biais des cas complets
+(les deux courbes se superposent). Inclure $Z$ suffit à l'annuler. À corrélation
+nulle, il n'y a rien à corriger : le manque dépend de $Z$, mais $Z$ ne dit rien de
+$X_1$, et la sélection ne déforme pas la distribution de $X_1$.
+
+::: {.app}
+**À l'application —** Cette leçon est manipulable dans le bac à sable : onglet
+**Introduction**, sous-onglet **Bac à sable**, mécanisme **MAR**, imputation **Par
+régression**, puis basculez *Modèle d'imputation* de **Complet** à **Incomplet —
+oublie X2**.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** En mode *incomplet*, la carte *Impact* montre que la
+récupération disparaît : sans le prédicteur du manque, le modèle d'imputation ne peut
+plus corriger la sélection (@fig-cap-bac-incomplet). La variable auxiliaire n'est pas
+un ornement — elle rend l'hypothèse MAR exploitable, sans transformer un vrai MNAR en
+MAR.
+:::
+
+Enfin, la **congénialité** : le modèle d'imputation et le modèle d'analyse doivent
+être mutuellement compatibles. Un modèle d'imputation plus simple que l'analyse (par
+exemple, omettant une interaction que l'analyse estimera) produit des résultats
+biaisés vers l'absence d'effet. En cas de doute, un modèle d'imputation généreux est
+préférable à un modèle avare.
+
+## Une autre voie : le FIML
+
+L'imputation multiple n'est pas la seule méthode principielle utilisable sous MAR
+lorsque le modèle est adéquat. Le **maximum de vraisemblance à information complète**
+(FIML) estime les paramètres directement à partir des données incomplètes, sans
+jamais imputer [@enders2022]. Sous MAR, FIML et imputation multiple sont
+asymptotiquement équivalents. Le @sec-fiml les compare à l'écran; on y a vu que FIML
+intègre les variables auxiliaires moins facilement que l'imputation multiple.
+
+## Exercices {.unnumbered}
+
+**13.1** Une collègue code une variable nominale à trois modalités (1 = rural,
+2 = banlieue, 3 = urbain) en numérique, puis l'impute avec une méthode de régression
+linéaire. Quel type de valeurs risque-t-elle d'obtenir, et pourquoi ? Que faudrait-il
+faire à la place ? *(Solution : @sec-sol-autres.)*
+
+**13.2** *(Données & visualisation, Traitements.)* Dans le scénario de référence,
+faites passer la *Corrélation entre variables (ρ)* de 0,5 à 0,2, puis à 0,8, en
+resimulant à chaque fois. Comment évolue le biais des cas complets sur la moyenne de
+$X_1$ ? Et celui de l'imputation multiple ? Reliez vos observations à la
+@fig-auxiliaire.
+
+**13.3** Dans la @fig-auxiliaire, pourquoi le biais des cas complets est-il nul quand
+la corrélation vaut 0, alors que le manque dépend bel et bien de $Z$ ?

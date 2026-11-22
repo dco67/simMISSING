@@ -1,0 +1,89 @@
+# Autres sujets {#sec-autres}
+
+Le cœur du manuel s'est concentré sur des variables continues et sur l'imputation
+multiple. Deux compléments méritent d'être abordés pour aller vers la pratique
+réelle : l'imputation de variables catégorielles et le choix du modèle d'imputation.
+(La deuxième grande voie de traitement, le maximum de vraisemblance FIML, a son propre
+chapitre : @sec-fiml.)
+
+## Imputer des variables catégorielles et mixtes
+
+Les données réelles mêlent souvent variables continues, binaires et nominales.
+L'imputation par équations chaînées gère ces types nativement : elle choisit
+automatiquement une méthode adaptée à **chaque** variable — l'appariement prédictif
+pour le continu, la régression logistique pour le binaire, la régression polytomique
+pour le nominal, la régression ordinale pour l'ordonné. Le résultat respecte la nature
+de chaque variable : une variable catégorielle reste catégorielle, avec ses modalités
+d'origine, et aucune case n'est laissée manquante.
+
+::: {.callout-note}
+Il faut vérifier que les variables catégorielles sont bien déclarées **comme des
+catégories**, et contrôler la méthode que le logiciel leur attribue. Certains outils,
+dont `mice`, reconnaissent souvent un codage binaire 0/1; ce n'est toutefois pas une
+raison pour supposer que tout codage numérique sera correctement interprété. Une
+variable nominale codée 1, 2, 3 ou une échelle ordinale mal déclarée peut être traitée
+comme continue et produire des valeurs intermédiaires sans sens. La règle pratique est
+de vérifier le type, les modalités admises et la méthode d'imputation avant de lancer
+l'analyse.
+:::
+
+## Choisir le modèle d'imputation
+
+La décision la plus lourde de conséquences n'est pas la méthode, mais le **choix des
+variables** entrant dans le modèle d'imputation. Trois principes guident ce choix.
+
+D'abord, le modèle d'imputation doit être **au moins aussi riche** que le modèle
+d'analyse : toute variable de l'analyse — y compris les termes d'interaction et les
+variables de résultat — doit y figurer, faute de quoi les relations d'intérêt seraient
+atténuées.
+
+Ensuite, on ajoute des **variables auxiliaires** : des variables absentes de l'analyse
+finale mais corrélées aux valeurs manquantes ou au fait de manquer. Elles rendent
+l'hypothèse MAR plus plausible et réduisent le biais. L'effet peut être spectaculaire :
+omettre la variable qui gouverne le manque laisse l'imputation biaisée, tandis que
+l'inclure fait pratiquement disparaître le biais. On a donc intérêt à inclure
+**largement** les variables observées — c'est exactement la leçon du prédicteur du
+manque (@sec-intro-predicteur).
+
+::: {.app}
+**À l'application —** Cette leçon est manipulable dans le bac à sable : onglet
+**Introduction**, sous-onglet **Bac à sable**, mécanisme **MAR**, imputation **Par
+régression**, puis basculez *Modèle d'imputation* de **Complet** à **Incomplet —
+oublie $X_2$**.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** En mode *incomplet*, la carte *Impact* montre une récupération
+nettement moins bonne : sans le prédicteur du manque, le modèle d'imputation ne peut
+plus corriger la sélection dans cet exemple. La variable auxiliaire n'est pas un
+ornement — elle rend l'hypothèse MAR plus exploitable, sans transformer un vrai NMAR
+en MAR.
+:::
+
+Enfin, la **congénialité** : le modèle d'imputation et le modèle d'analyse doivent être
+mutuellement compatibles. Un modèle d'imputation plus simple que l'analyse (par
+exemple, omettant une interaction que l'analyse estimera) produit des résultats
+biaisés. En cas de doute, un modèle d'imputation généreux est préférable à un modèle
+avare.
+
+## Une autre voie : le FIML
+
+L'imputation multiple n'est pas la seule méthode principielle utilisable sous MAR
+lorsque le modèle est adéquat. Le
+**maximum de vraisemblance à information complète** (FIML) estime les paramètres
+directement à partir des données incomplètes, sans jamais imputer [@enders2022]. Sous
+MAR, FIML et imputation multiple sont asymptotiquement équivalents. Cette seconde voie
+fait l'objet du @sec-fiml, où on la compare à l'imputation multiple, à l'écran.
+
+## Exercices {.unnumbered}
+
+**11.1** Une collègue code une variable binaire en 0/1 numérique, puis l'impute comme
+si de rien n'était. Quelle méthode l'algorithme lui appliquera-t-il, et pourquoi
+risque-t-elle d'obtenir des valeurs imputées comme 0,4 ? Que faudrait-il faire à la
+place ? *(Solution : @sec-sol-autres.)*
+
+**11.2** *(Bac à sable.)* L'apport d'une variable auxiliaire dépend de sa corrélation
+avec la variable amputée. En faisant varier la *Corrélation entre variables (ρ)* dans
+le bac à sable, puis en basculant le *Modèle d'imputation* de *Complet* à *Incomplet*,
+observez : l'écart entre les deux modes grandit-il ou se réduit-il quand $\rho$
+augmente ? Interprétez.

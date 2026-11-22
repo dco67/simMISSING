@@ -1,0 +1,125 @@
+# Le maximum de vraisemblance (FIML) {#sec-fiml}
+
+L'imputation multiple comble les trous avant d'analyser. Le **maximum de
+vraisemblance à information complète** (FIML, *Full Information Maximum Likelihood*)
+suit une voie différente : il **n'impute rien**. Il estime directement les
+paramètres du modèle en maximisant la vraisemblance des données observées, chaque
+observation contribuant avec les variables dont elle dispose. Sous un mécanisme MAR,
+FIML et imputation multiple sont deux routes principielles vers la même destination.
+Ce chapitre correspond à la méthode *Maximum de vraisemblance (FIML)* de l'onglet
+**Traitements**, sur le jeu MAR familier où le manque de $X_1$ dépend de $X_2$.
+
+## Estimer sans imputer
+
+La vraisemblance d'un jeu complet est le produit des contributions de chaque
+observation. Lorsqu'une observation a des valeurs manquantes, FIML n'invente pas ces
+valeurs : il **marginalise** sur elles, c'est-à-dire qu'il évalue la contribution de
+cette observation sur ses seules variables observées. Formellement, la
+log-vraisemblance se décompose selon les patrons de manque : chaque observation
+contribue par la densité de la loi (multinormale, typiquement) restreinte à ses
+composantes présentes.
+
+En maximisant cette vraisemblance, on obtient d'un coup les moyennes, variances et
+covariances — et, de là, toute quantité qui s'en déduit. Aucune valeur n'est
+imputée ; on estime les **paramètres** directement.
+
+::: {.callout-note}
+Comme l'imputation multiple, FIML est valide sous un mécanisme **ignorable** (MAR ou
+MCAR) : il n'exige pas de modéliser le processus de manque. Les deux méthodes
+diffèrent par la mécanique, non par les hypothèses (@sec-mecanismes).
+:::
+
+## FIML pour la moyenne
+
+Pour estimer la moyenne de $X_1$ en exploitant toute l'information, FIML ajuste un
+modèle **saturé** — toutes les moyennes et toutes les (co)variances des variables.
+Faire entrer $X_2$, $X_3$ et $X_4$ dans la vraisemblance est essentiel : c'est par
+elles, exactement comme l'imputation multiple, que FIML récupère la moyenne que les
+cas complets sous-estimaient. Sans ces variables observées, il n'aurait aucun moyen
+de corriger la sélection introduite par un manque MAR.
+
+## Les deux voies visent la même information
+
+Confrontées à la vérité, FIML et l'imputation multiple se rapprochent souvent l'une
+de l'autre, et de la vérité, dans ce scénario. Ce n'est pas une coïncidence : sous
+MAR et avec des modèles convenablement spécifiés, imputer $m$ fois puis mettre en
+commun, ou maximiser la vraisemblance des données observées, sont deux façons
+cohérentes d'exploiter la même information. Elles ne sont pas nécessairement
+identiques dans un échantillon fini ni sous des choix de modèles différents.
+
+::: {.app}
+**À l'application —** Onglet **Traitements**, *Quantité à estimer* = **Moyenne d'une
+variable**, variable $X_1$, puis *Comparer les méthodes*. Repérez, dans la carte
+*Comparaison des estimations*, les lignes *Imputation multiple (mise en commun)* et
+*Maximum de vraisemblance (FIML)*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** Les deux lignes sont souvent **côte à côte**, presque
+confondues, et toutes deux proches de la vérité. Basculez ensuite *Quantité à
+estimer* sur **Corrélation** puis **Coefficients de régression** : observez si elles
+restent proches dans ce scénario — deux routes qui exploitent une information
+semblable, sans promettre une identité parfaite.
+:::
+
+## Lire l'écran : une comparaison de méthodes, pas un concours
+
+Lorsque FIML et l'imputation multiple donnent des nombres voisins, la bonne leçon
+n'est pas que l'une « confirme » l'autre. Les deux méthodes reposent largement sur
+la même hypothèse MAR et sur les mêmes variables observées; elles peuvent donc
+partager le même biais si cette hypothèse est mal adaptée. Leur accord est
+rassurant sur la cohérence du calcul, non une démonstration que MAR est vrai.
+
+Dans l'application, comparez-les en trois étapes : (1) leur distance à la vérité
+simulée; (2) leur écart mutuel; (3) leur comportement quand vous changez le
+mécanisme ou omettez un prédicteur important. Dans une étude réelle, seule la
+deuxième comparaison demeure directement observable; elle doit être complétée par
+les diagnostics du @sec-qualite-imputation et, si nécessaire, par la sensibilité
+MNAR.
+
+## FIML pour une régression
+
+Le même principe donne les coefficients d'une régression : on spécifie le modèle et
+on l'estime par FIML. Un détail compte : il faut laisser la méthode modéliser aussi
+la **distribution des prédicteurs**, et non les traiter comme fixés. Ainsi, une ligne
+où un prédicteur manque contribue tout de même à la vraisemblance, au lieu d'être
+écartée — c'est là que FIML récupère l'information que les cas complets auraient
+jetée.
+
+## Imputation multiple ou FIML ?
+
+Les deux méthodes sont valides sous MAR ; le choix tient à des considérations
+pratiques.
+
+| | Imputation multiple | FIML |
+|---|---|---|
+| Principe | complète les données, puis analyse | estime les paramètres sans compléter |
+| Souplesse | toute analyse ultérieure possible | liée au modèle spécifié |
+| Variables auxiliaires | s'ajoutent librement au modèle d'imputation | s'ajoutent, mais alourdissent le modèle |
+| Sortie | $m$ jeux complétés, réutilisables | paramètres et erreurs-types directs |
+
+En pratique, FIML brille lorsqu'on ajuste **un** modèle bien défini (équations
+structurelles, régression) ; l'imputation multiple brille lorsqu'on enchaîne
+**plusieurs** analyses ou que l'on veut des jeux complétés réutilisables.
+
+::: {.callout-warning}
+FIML n'échappe pas à la limite fondamentale : sous **NMAR**, il peut rester biaisé,
+tout comme l'imputation multiple. Estimer sans imputer ne crée pas d'information sur
+ce qui a disparu sans trace (@sec-sensibilite-mnar).
+:::
+
+## Exercices {.unnumbered}
+
+**6b.1** *(Traitements.)* Sur les trois quantités (moyenne, corrélation, régression),
+relevez l'écart entre les estimations *FIML* et *Imputation multiple*. Est-il petit
+devant leur écart aux *cas complets* ? *(Solution : @sec-sol-fiml.)*
+
+**6b.2** *(Traitements.)* Passez le mécanisme à **NMAR** dans l'application
+(prédicteur = la variable cible elle-même). FIML récupère-t-il encore la vérité ?
+Reliez votre réponse à l'ignorabilité (@sec-mecanismes).
+
+**6b.3** FIML donne de meilleurs coefficients quand il **modélise la distribution des
+prédicteurs** plutôt que de les traiter comme fixés — mais seulement si des
+prédicteurs comportent eux-mêmes des manquants. Expliquez pourquoi : qu'apporte la
+modélisation des prédicteurs lorsqu'une ligne a un prédicteur manquant, et pourquoi
+ne change-t-elle rien lorsque tous les prédicteurs sont complets ?

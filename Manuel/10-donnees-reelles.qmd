@@ -1,0 +1,96 @@
+# Données réelles : études de cas {#sec-donnees-reelles}
+
+Sur de vraies données, la vérité n'existe pas : on ne peut plus mesurer le biais. Mais
+toute la démarche des chapitres précédents — visualiser, tester MCAR, imputer,
+diagnostiquer — reste applicable. Ce chapitre l'illustre sur trois jeux classiques. Il
+correspond à l'onglet **Données réelles** de l'application, qui enchaîne toute la
+chaîne d'analyse en un clic.
+
+::: {.app}
+**À l'application —** Onglet **Données réelles**. Choisissez un *Jeu de données*
+(*airquality*, *nhanes* ou *boys*) et une *Variable pour observé/imputé*, puis
+*Imputer et diagnostiquer*. L'onglet déroule toute la démarche : *Aperçu*, *Carte des
+valeurs manquantes*, *Patrons*, *Test de Little (MCAR)*, *Observé vs imputé* et une
+*Interprétation*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** La même chaîne que dans ce chapitre, mais sur données réelles
+et en un clic : sur *airquality*, le test rejette MCAR ; sur *nhanes* (25
+observations), il ne rejette pas — sans rien prouver ; sur *boys*, le manque massif du
+volume testiculaire chez les plus jeunes illustre un MAR piloté par l'âge, une
+variable observée.
+:::
+
+## Qualité de l'air (*airquality*)
+
+Le jeu *airquality* rassemble des mesures quotidiennes à New York (mai–septembre
+1973) ; l'ozone et le rayonnement solaire comportent des manquants. Dans l'application,
+le test de Little y **rejette MCAR** : le manque n'est pas compatible avec une absence
+de structure dans ce modèle. On ne peut pas dire s'il est MAR ou NMAR, mais les
+variables météo complètes constituent des prédicteurs plausibles à inclure dans une
+imputation sous MAR. La carte *observé vs imputé* peut vérifier que le résultat reste
+plausible; elle ne confirme pas à elle seule le mécanisme.
+
+## NHANES (petit échantillon)
+
+Le jeu *nhanes* [@schafer1997] ne compte que 25 observations — un cas d'école pour la
+**puissance**. Ici, le test **ne rejette pas** MCAR. Attention au piège : ce
+non-rejet ne prouve pas que les données sont MCAR. Sur 25 observations, la puissance
+est faible — l'absence de preuve n'est pas une preuve d'absence
+(@sec-diagnostic-little).
+
+## Croissance de garçons (*boys*)
+
+Le jeu *boys* [@fredriks2000] suit 748 garçons néerlandais. Le volume testiculaire
+manque surtout chez les plus jeunes — un âge qui est, justement, **observé**. C'est
+une illustration très plausible d'un mécanisme MAR : l'âge doit alors faire partie du
+modèle d'imputation. Le test rejette nettement MCAR, comme attendu, mais ne transforme
+pas cette plausibilité en preuve; une imputation crédible exploite l'âge sans prétendre
+avoir exclu tout mécanisme MNAR.
+
+## Une démarche récapitulative
+
+Sur des données réelles, on procède ainsi :
+
+1. **Décrire** le manque : combien, où (carte, patrons, pourcentages).
+2. **Diagnostiquer** : tester MCAR ; se souvenir qu'un rejet ne dit pas MAR ou NMAR, et
+   qu'un non-rejet ne prouve rien.
+3. **Raisonner** sur le mécanisme plausible à partir du contexte (comme l'âge pour
+   *boys*).
+4. **Imputer** sous MAR (imputation multiple) et **diagnostiquer** l'imputation
+   (@sec-qualite-imputation).
+5. En cas de doute NMAR, mener une **analyse de sensibilité** (@sec-sensibilite-mnar).
+
+## Lire l'écran : une démarche terrain, pas une machine à classer
+
+L'onglet **Données réelles** rassemble les cartes vues séparément dans le manuel.
+Lisez-les dans la séquence suivante :
+
+| Étape | Sorties de l'application | Décision ou phrase défendable |
+|---|---|---|
+| **Décrire** | Cartouches, carte, patrons et pourcentage par variable | « Le manque se concentre sur…; les patrons les plus fréquents sont… » |
+| **Expliquer** | Test de Little et associations avec les variables observées | « MCAR est rejeté/non rejeté; les variables associées au manque sont… » |
+| **Traiter** | Imputation et comparaison observé/imputé | « Nous retenons un modèle d'imputation incluant… » |
+| **Vérifier** | Plausibilité des imputations, convergence et stabilité de $m$ | « Les diagnostics ne révèlent pas de valeur hors registre ni de non-convergence manifeste. » |
+| **Sensibiliser** | Analyse delta si MNAR demeure plausible | « La conclusion reste/changerait sous une déviation MNAR de… » |
+
+Les deux premières étapes sont des **observations**; les trois suivantes comportent
+des **choix méthodologiques**. Le rapport doit les distinguer explicitement. Aucune
+carte n'autorise la phrase « les données sont MAR »; on écrit plutôt pourquoi une
+analyse sous MAR est retenue et quelles limites subsistent.
+
+## Exercices {.unnumbered}
+
+**10.1** *(Données réelles.)* Sur *airquality*, comparez la moyenne de l'ozone selon
+que le manque est traité par cas complets ou par imputation multiple. L'écart entre
+les deux est-il cohérent avec le fait que le test rejette MCAR ? *(Solution :
+@sec-sol-reelles.)*
+
+**10.2** *(Données réelles.)* Sur *boys*, examinez, dans la carte observé/imputé, les
+valeurs imputées du volume testiculaire au regard de l'âge. Le comblement respecte-t-il
+la croissance attendue avec l'âge, ou place-t-il des valeurs invraisemblables ?
+
+**10.3** Choisissez, parmi les trois jeux proposés, celui que vous connaissez le moins,
+et appliquez-lui vous-même la démarche récapitulative en cinq points, en notant à
+chaque étape ce que l'application vous montre.

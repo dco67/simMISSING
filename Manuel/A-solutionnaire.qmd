@@ -1,0 +1,333 @@
+# Solutionnaire {#sec-solutionnaire}
+
+Ce solutionnaire regroupe les corrigés des exercices, chapitre par chapitre. Chaque
+corrigé renvoie aux manipulations à mener dans l'application, ou au raisonnement
+attendu. Sauf mention contraire, les valeurs citées proviennent du scénario de
+référence (graine 2416).
+
+## Chapitre 1 — Le problème des données manquantes {#sec-sol-intro}
+
+**1.1** Sous MCAR, la carte ne signale pas de décalage **systématique** : d'un tirage
+à l'autre, la moyenne des cas complets est parfois trop haute (tirage n° 2 : 51,0),
+parfois trop basse (tirage n° 5 : 47,5), pour une vérité de 48,9. Les écarts changent
+de sens : c'est de la fluctuation. Le manque frappe au hasard; les cas restants
+forment un sous-échantillon représentatif *en moyenne*, et la quantité de manque
+réduit surtout la **précision** — les écarts deviennent plus grands quand $k$
+augmente, sans prendre de direction privilégiée.
+
+**1.2** L'imputation *Par régression* (mode complet) se rapproche de la moyenne vraie
+(49,6 contre 48,9) et préserve la pente (0,84), car elle exploite le prédicteur du
+manque. L'imputation *Par la moyenne* comble tous les trous par une même valeur : elle
+**écrase la pente** (0,44) et rétrécit l'écart-type (7,5 contre 9,5). C'est le
+pendant, en covariation, du rétrécissement de la variance — combler par une constante
+détruit à la fois la dispersion et le lien entre variables.
+
+**1.3** Sous MCAR, le biais des cas complets sur la moyenne de $X_1$ **disparaît** (au
+tirage n° 1 : 48,6 contre 48,9) : le manque ne dépend plus d'aucune donnée, donc la
+moyenne des cas observés vise juste en moyenne. Le biais venait du mécanisme MAR, où
+les valeurs manquantes — les plus élevées — ne formaient pas un sous-échantillon
+représentatif.
+
+**1.4** Oui, les deux erreurs-types naïves sont en rouge (environ 0,10 pour une vérité
+de 0,133). Le résidu aléatoire rend aux valeurs imputées leur dispersion, mais
+l'analyse traite toujours ces valeurs comme si elles avaient été **observées** : elle
+ignore que d'autres tirages auraient donné d'autres valeurs. Cette incertitude
+d'imputation ne peut être mesurée qu'en **répétant** l'imputation — c'est le terme $B$
+de l'imputation multiple.
+
+## Chapitre 2 — Les mécanismes {#sec-sol-mecanismes}
+
+**2.1** Une dépendance plus forte au prédicteur rend la sélection plus nette : le biais
+des cas complets **augmente**, et la liaison entre l'indicateur de manque et $X_2$
+**croît** dans la carte *Signature*. Les deux vont de pair : plus le manque « écoute »
+$X_2$, plus la sélection déforme la moyenne et plus la trace laissée dans l'observé
+est visible.
+
+**2.2** Oui. Le biais sur la moyenne de $X_1$ dépend de la **force du lien** entre
+$X_1$ et le prédicteur. Si le prédicteur est peu corrélé à $X_1$, sélectionner sur lui
+ne déforme presque pas la distribution de $X_1$ : peu de biais à corriger — mais aussi
+peu de biais tout court. Le biais s'annulerait si le prédicteur était indépendant de
+$X_1$ (voir aussi la @fig-auxiliaire).
+
+**2.3** Sous **MCAR**, la pente de la régression de $X_1$ sur $X_2$ reste fidèle à la
+vérité, aux fluctuations près : les manquants forment un sous-échantillon aléatoire, la
+relation est préservée. Sous **MNAR**, la sélection porte sur les valeurs de $X_1$
+elle-même — la variable expliquée —, ce qui coupe le haut du nuage et aplatit la
+pente (@fig-cc-regression, à droite).
+
+**2.4** Sont **ignorables** (MCAR ou MAR) les scénarios où le manque dépend de rien ou
+d'une variable **observée** : la panne fortuite, la page arrachée au hasard, les tubes
+égarés et la coupure de courant (MCAR); l'âge connu, le sexe connu, les notes
+antérieures, la région, la gravité à l'admission, la vitesse de course et l'historique
+du panel (MAR). Sont **non ignorables** (MNAR) ceux où le manque dépend de la valeur
+absente elle-même — le haut revenu tu, la dépression finale, le seuil de détection, la
+balance saturée, le client insatisfait, le thermomètre par grand froid, la mauvaise
+note retirée — et ceux-là seuls exigeraient une analyse de sensibilité.
+
+**2.5** Sous MAR, le manque dépend de $X_2$; comme $X_1$ est corrélée à $X_2$, les
+lignes où $X_1$ manque ont aussi, en moyenne, des valeurs de $X_1$ plus élevées
+(nuage bleu, à droite de la @fig-proba-manque). Le lien avec la vraie valeur est donc
+réel, mais **indirect**. Pour montrer qu'il disparaît « une fois $X_2$ pris en
+compte », on calculerait une corrélation **partielle** entre l'indicateur de manque et
+$X_1$, à $X_2$ fixé (ou une régression logistique du manque sur $X_1$ et $X_2$) : sous
+MAR, le coefficient de $X_1$ y serait voisin de zéro; sous MNAR, non.
+
+## Chapitre 3 — Simuler et visualiser {#sec-sol-simuler}
+
+**3.1** La probabilité de manquer croît vers les **faibles** valeurs du prédicteur :
+les points orange se déplacent vers la **gauche** du nuage. La sélection s'inverse :
+les valeurs effacées sont maintenant les plus faibles, et la moyenne des valeurs
+observées de $X_1$ devient **trop haute** (0,148 contre une vérité de −0,040, avec la
+graine 2416).
+
+**3.2** Sous MNAR, les points orange se regroupent le long de l'**axe vertical**, en
+haut du nuage — les valeurs élevées de $X_1$ —, plus que selon $X_2$. Le manque se
+décide sur l'axe de la variable qui disparaît : c'est la signature visuelle du MNAR,
+visible ici seulement parce que l'axe vertical montre la valeur vraie.
+
+**3.3** Un patron **monotone** se reconnaît à sa forme en escalier : peu de patrons,
+emboîtés les uns dans les autres (tout observé; la dernière vague manquante; les deux
+dernières; etc.), comme au panneau central de la @fig-trois-patrons. Un manque
+**quelconque** produit au contraire une mosaïque de patrons sans emboîtement.
+
+**3.4** L'*omission groupée d'un bloc* produit les lignes les plus incomplètes : chaque
+ligne touchée perd les trois variables à la fois. À nombre de lignes incomplètes égal
+(environ 35 %), elle supprime donc environ trois fois plus de cellules (26,8 % contre
+8,8 %) que les *réponses ponctuelles*, où chaque ligne touchée ne perd qu'une valeur.
+
+## Chapitre 4 — Diagnostic {#sec-sol-diagnostic}
+
+**4.1** Sous MCAR, la valeur-p est généralement grande. En resimulant, on rejette à
+tort dans environ 5 % des cas — une fois sur vingt, au seuil de 5 % (@fig-little-puissance).
+Un **test unique** ne prouve donc rien à lui seul : le verdict fluctue d'un tirage à
+l'autre, et il faut le lire comme un indice.
+
+**4.2** La ligne MNAR passe de « non rejeté » à « rejeté » pour une corrélation
+modeste, le plus souvent entre 0,2 et 0,5 selon le tirage : d'après la
+@fig-little-puissance, le test rejette environ une fois sur trois à ρ = 0,2, trois
+fois sur quatre à 0,3 et presque toujours à 0,5. Le taux de rejet **croît avec ρ** : plus la
+variable manquante est corrélée aux variables observées, plus la sélection y laisse
+une trace détectable. À $\rho = 0$, il retombe au niveau de MCAR — le MNAR devient
+invisible.
+
+**4.3** Un non-rejet de MCAR ne garantit pas l'ignorabilité (@sec-mecanismes). Il peut
+refléter une faible puissance, ou un mécanisme MNAR décorrélé, indétectable. Or
+l'imputation multiple n'est valide que sous un mécanisme ignorable : la décision d'y
+recourir repose sur un argument de fond, non sur l'absence de rejet.
+
+**4.4** La contribution d'un patron est le produit de sa taille par la distance
+standardisée entre ses moyennes et l'estimation EM. Le patron « $X_1$ manquante » ne
+compte que 135 lignes, mais sa moyenne de $X_2$ (0,567) est très loin de l'estimation
+EM (−0,039), plus loin que celle du patron complet (−0,348). Comme la distance entre
+en carré, son écart deux fois plus grand l'emporte sur sa taille deux fois plus petite.
+
+## Chapitre 5 — Cas complets et imputation simple {#sec-sol-traitements}
+
+**5.1** Sous MCAR, la ligne *Cas complets (listwise)* rejoint la vérité, aux
+fluctuations près : le manque ne dépend d'aucune donnée, et les lignes restantes sont
+un sous-échantillon aléatoire. Seule la précision baisse, car on a jeté l'information
+des lignes incomplètes. Le listwise redevient donc acceptable — pour le biais — dès que
+le manque est complètement aléatoire.
+
+**5.2** La régression **déterministe** laisse la distribution imputée trop resserrée
+(écart-type 0,60 contre 0,84 pour les vraies valeurs effacées) : toutes les valeurs se
+posent sur la droite de régression. La régression **stochastique** ajoute le bruit
+résiduel et rend un étalement comparable (1,00). La différence tient entièrement à
+l'absence, ou à la présence, de ce résidu.
+
+**5.3** Oui, le pic se renforce : avec une proportion de 0,60, environ 57 % des valeurs
+de $X_1$ manquent. La règle prédit un écart-type de $0{,}984 \times \sqrt{1 - 0{,}573}
+\approx 0{,}643$; l'application affiche 0,642. Plus la part de valeurs imputées par une
+constante grandit, plus la dispersion s'effondre, et plus la corrélation avec $X_2$ est
+tirée vers zéro.
+
+**5.4** Après une régression déterministe, les 135 lignes imputées tombent
+**exactement** sur la droite : leur écart à la droite est nul. Or la corrélation mesure
+la part de variation expliquée par la droite; en supprimant la dispersion autour d'elle
+pour un tiers des lignes, on rend la relation plus « parfaite » qu'elle ne l'est, d'où
+une corrélation gonflée (0,565 contre 0,504).
+
+## Chapitre 6 — L'imputation multiple {#sec-sol-imputation}
+
+**6.1** L'estimation mise en commun bouge peu : −0,053 avec $m = 5$, −0,061 avec
+$m = 50$, pour une erreur-type d'environ 0,06. Ces variations sont petites devant
+l'incertitude, mais pas nulles. Pour juger si $m$ suffit, il faut surtout regarder la
+stabilité de l'**erreur-type**, plus lente à se stabiliser — c'est l'objet de la carte
+*Effet du nombre d'imputations* (@sec-qualite-imputation).
+
+**6.2** La variance **intra**-imputation $\bar{U}$ est l'incertitude « ordinaire » de
+l'estimation, celle qu'on aurait même sans manque. La variance **inter**-imputation $B$
+mesure le désaccord entre les $m$ tableaux, c'est-à-dire l'incertitude **due au
+manque**. Elle pèse d'autant plus lourd qu'il manque **beaucoup** de données : plus les
+trous sont nombreux, plus les imputations diffèrent. Ici, $\lambda = 25\ \%$ : un quart
+de la variance tient aux 34 % de valeurs absentes de $X_1$.
+
+**6.3** L'erreur-type de l'imputation multiple (0,059) est plus **honnête** que celle de
+l'imputation par la moyenne (0,042) : cette dernière traite 135 valeurs inventées comme
+des observations, avec une dispersion artificiellement réduite. Elle omet entièrement
+la variance inter-imputation $B$.
+
+**6.4** Chaque intervalle individuel a une demi-largeur d'environ
+$1{,}96 \sqrt{U_k} \approx 1{,}96 \times 0{,}051$. L'intervalle mis en commun utilise
+$\sqrt{T} = \sqrt{\bar{U} + 1{,}1\,B} = 0{,}059$. Sans le terme $B$, on retrouverait
+$\sqrt{\bar{U}} = 0{,}051$, la largeur des intervalles individuels : le surplus vient
+donc entièrement de $B$.
+
+## Chapitre 7 — Le maximum de vraisemblance (FIML) {#sec-sol-fiml}
+
+**7.1** L'écart entre FIML et imputation multiple est de quelques millièmes (moyenne :
+−0,054 et −0,050; corrélation : 0,507 et 0,506), alors que l'écart aux cas complets
+atteint 0,15 pour la moyenne. Pour la régression, les trois méthodes sont voisines,
+parce que seule la variable dépendante manque. Les deux voies exploitent une
+information observée semblable; leur accord ne prouve pas à lui seul que MAR est vrai.
+
+**7.2** Non. Sous MNAR, FIML estime la moyenne à −0,218 pour une vérité de −0,040 : il
+**reste biaisé**, comme l'imputation multiple. La vraisemblance des données observées
+ne contient pas toute la trace de la sélection sur les valeurs manquantes. Le mécanisme
+est non ignorable, et aucune méthode fondée sur l'ignorabilité n'est garantie.
+
+**7.3** Quand FIML traite les prédicteurs comme **fixés**, une ligne dont un prédicteur
+manque ne peut plus contribuer au modèle. En **modélisant leur distribution**, FIML
+les traite comme des variables aléatoires et récupère l'information partielle de ces
+lignes. Cela ne change rien lorsque tous les prédicteurs sont complets — il n'y a alors
+aucune ligne à récupérer.
+
+**7.4** La contribution d'une variable est le produit de son coefficient par l'écart de
+moyenne entre toutes les lignes et les cas complets. Le coefficient de $X_2$ (0,221)
+est le plus petit des trois, mais son écart de moyenne (0,309) est de loin le plus
+grand, parce que c'est $X_2$ qui pilote le manque : les cas complets sont
+sélectionnés sur $X_2$. Sa contribution (0,068) est donc la plus forte.
+
+## Chapitre 8 — Étude de simulation {#sec-sol-simulation}
+
+**8.1** L'erreur de Monte Carlo d'une couverture de 95 % vaut
+$\sqrt{0{,}95 \times 0{,}05 / R}$ : 1,5 point pour $R = 200$, 1,0 point pour
+$R = 500$. Avec plus de réplications, le pourcentage affiché varie moins d'un
+lancement à l'autre. Une couverture estimée sur peu de réplications est donc
+elle-même imprécise, et doit être lue avec cette marge.
+
+**8.2** Une imputation stochastique **unique** corrige le biais et préserve la variance
+de la variable, mais l'analyse subséquente ignore toujours l'incertitude d'imputation —
+la part inter-imputation $B$. Son erreur-type reste trop petite et sa couverture
+inférieure à 95 %. Seule la répétition — l'imputation multiple — restaure la
+couverture.
+
+**8.3** Le biais des cas complets **augmente** avec la proportion de manque : −0,087 à
+0,2, −0,144 à 0,35, −0,258 à 0,6; leur couverture tombe de 63,5 % à 11,5 %.
+L'imputation multiple reste beaucoup plus proche de la vérité, mais avec 57 % de
+valeurs manquantes, un petit biais net apparaît (−0,025) et la couverture descend à
+88 % : avec $m = 5$ et beaucoup de manque, l'appariement prédictif manque de donneurs
+pour les valeurs extrêmes. Sa précision diminue aussi (écart-type empirique de 0,058 à
+0,089).
+
+**8.4** Pour la corrélation entre $X_1$ et $X_2$, le biais des cas complets est faible
+(−0,033), bien plus faible que pour la moyenne : la sélection sur $X_2$ conserve
+presque la relation, comme la pente de la @fig-cc-regression. Il n'est pas nul,
+parce qu'une corrélation, contrairement à une pente, dépend aussi de la dispersion de
+$X_2$, réduite parmi les cas complets. Leur couverture (85,5 %) reste insuffisante;
+celle de l'imputation multiple atteint 91 %.
+
+## Chapitre 9 — Qualité de l'imputation {#sec-sol-qualite}
+
+**9.1** Les traces gardent la même allure avec 5 ou 40 itérations. Dans ce scénario,
+une seule variable est incomplète : à chaque itération, $X_1$ est imputée à partir de
+$X_2$, $X_3$ et $X_4$, qui ne changent jamais. Il n'y a donc aucune dépendance entre
+itérations à résorber, et la convergence est immédiate. Le nombre d'itérations compte
+quand plusieurs variables incomplètes s'imputent mutuellement.
+
+**9.2** Sous **MCAR**, les distributions observée et imputée se superposent, à la
+variabilité des imputations près : les valeurs manquantes ne diffèrent en rien des
+autres. Sous **MAR**, un décalage apparaît parce que l'imputation exploite $X_2$ pour
+corriger la sélection. Il n'est donc pas inquiétant, mais ne constitue pas non plus, à
+lui seul, une preuve que le modèle est bon.
+
+**9.3** Plus lentement, en général. La stabilité dépend de la part de $B$ dans la
+variance totale : plus une quantité dépend des valeurs imputées, plus elle varie d'un
+jeu à l'autre, et plus il faut de jeux pour estimer $B$ avec précision. Un coefficient
+de régression qui fait intervenir la variable incomplète, ou une variance, est souvent
+plus sensible aux imputations qu'une moyenne.
+
+## Chapitre 10 — Analyse de sensibilité MNAR {#sec-sol-sensibilite}
+
+**10.1** Oui : sur le scénario de référence, la courbe croise la vraie moyenne vers
+$\delta \approx +0{,}03$. C'est attendu : quand le vrai mécanisme est MAR, l'imputation
+sous MAR est déjà sans biais, et aucun décalage n'est nécessaire.
+
+**10.2** Avec une amplitude de ±3, l'intervalle de confiance devient entièrement
+positif à partir de $\delta = +1{,}25$. La conclusion « la moyenne diffère de 0 »
+change donc deux fois : elle est négative pour $\delta < 0{,}5$, indéterminée entre
+0,5 et 1,25, positive au-delà. Un tel renversement exige un décalage important (plus
+d'un écart-type), mais la conclusion « moyenne négative » tombe, elle, dès un demi
+écart-type.
+
+**10.3** L'estimation passe au-dessus de −0,1 vers $\delta \approx 0{,}4$ (−0,145 à
+0,25; −0,071 à 0,5). Si l'expert borne les écarts à ±0,3 écart-type, l'estimation
+ponctuelle reste sous −0,1 dans toute la plage plausible : la conclusion est robuste
+pour l'estimation. Elle ne l'est plus si l'on exige que tout l'intervalle de confiance
+reste sous −0,1 : sa borne supérieure, −0,114 à $\delta = 0$, dépasse −0,1 dès un
+décalage minime (environ $\delta = 0{,}05$).
+
+## Chapitre 11 — Exemple guidé {#sec-sol-exemple}
+
+**11.1** Avec 50 % de cas incomplets, la description et le diagnostic ne changent pas
+de nature (MCAR est rejeté encore plus nettement : $d^2 = 66{,}8$). L'étude de
+simulation montre un biais des cas complets presque doublé (+0,154) et une couverture
+qui chute à 29,5 %, alors que l'imputation multiple reste sans biais (−0,004) et
+couvre 94 %. La sensibilité devient plus fragile : l'intervalle à $\delta = 0$
+s'élargit ([−0,153 ; 0,148]) et la conclusion bascule dès $\delta = \pm 0{,}375$,
+car plus de valeurs subissent le décalage.
+
+**11.2** Non. Sur un seul tirage, la régression stochastique tombe plus près de la
+vérité par hasard : elle n'utilise qu'un seul tirage aléatoire, et sa position dépend
+de ce tirage. L'étape 4 montre que l'imputation multiple est sans biais à long terme,
+et surtout que son erreur-type est honnête (couverture de 95 %), ce qu'aucune
+imputation unique n'assure. Un tirage ne classe pas les méthodes (@sec-etude-simulation).
+
+**11.3** Une réponse possible : « Près d'un employé sur trois n'a pas rempli le
+questionnaire, surtout parmi les plus récemment arrivés. En tenant compte de ce
+déséquilibre, le bien-être moyen est estimé à 0,09, ce qui ne diffère pas de l'an
+dernier, alors que les seuls répondants laissaient croire à une hausse. Cette
+conclusion suppose que l'ancienneté et les autres données administratives expliquent
+qui répond; elle tiendrait encore si les non-répondants allaient sensiblement moins
+bien que prévu, sans toutefois pouvoir l'exclure. »
+
+## Chapitre 12 — Données réelles {#sec-sol-reelles}
+
+**12.1** Les valeurs imputées de l'ozone sont en moyenne légèrement **plus basses**
+(environ 40,9 ppb) que les valeurs observées (42,1). Cela suggère que la moyenne des cas
+complets surestime un peu l'ozone moyen de l'été. L'écart est toutefois petit devant
+l'incertitude, et ne démontre pas MAR : il découle des variables météo incluses dans le
+modèle d'imputation.
+
+**12.2** L'imputation exploite l'âge pour combler le volume testiculaire : dans le
+nuage, les valeurs imputées sont faibles avant 10 ans et suivent la croissance ensuite,
+sans valeurs invraisemblables. Sans l'âge dans le modèle, le comblement s'appuierait
+sur les seules variables restantes; comme la taille, le poids et le périmètre crânien
+sont eux-mêmes liés à l'âge, la relation serait en partie récupérée, mais moins bien,
+et des valeurs adultes pourraient être attribuées à de jeunes enfants.
+
+**12.3** Réponse ouverte : appliquer les cinq étapes — décrire, diagnostiquer, raisonner
+sur le mécanisme, imputer puis diagnostiquer l'imputation, et mener une analyse de
+sensibilité si un doute MNAR subsiste — au jeu choisi, en notant à chaque étape ce que
+l'application affiche.
+
+## Chapitre 13 — Autres sujets {#sec-sol-autres}
+
+**13.1** Traitée comme continue par une régression linéaire, la variable reçoit des
+valeurs intermédiaires sans signification (par exemple 1,7, « entre rural et
+banlieue »), voire hors plage. Il faut la déclarer comme **facteur** et vérifier que le
+logiciel lui attribue une méthode adaptée (régression polytomique); avec l'appariement
+prédictif, les valeurs resteraient des modalités existantes, mais le modèle en
+ignorerait encore la nature nominale.
+
+**13.2** Avec ρ = 0,2, le biais des cas complets est faible (−0,043 sur ce tirage) :
+$X_2$, qui pilote le manque, dit peu de chose de $X_1$. Avec ρ = 0,8, il devient
+important (−0,315). L'imputation multiple reste proche de la vérité dans les deux cas
+(+0,008 et −0,021). C'est la @fig-auxiliaire en action : plus le prédicteur du manque
+est lié à la variable amputée, plus il y a de biais à corriger, et plus l'inclure est
+décisif.
+
+**13.3** Le manque dépend de $Z$, mais si $Z$ est indépendante de $X_1$, choisir des
+lignes selon $Z$ revient à les choisir au hasard du point de vue de $X_1$ : la
+distribution de $X_1$ parmi les lignes restantes est la même que dans l'ensemble. Le
+mécanisme est MAR par rapport à $Z$, mais se comporte comme MCAR pour $X_1$.

@@ -1,0 +1,64 @@
+# Glossaire : du manuel à l'écran {#sec-glossaire .unnumbered}
+
+Ce glossaire rassemble les termes du manuel. Pour chacun, la dernière colonne indique
+où le voir dans l'application.
+
+## Notions et méthodes
+
+| Terme | Définition | Dans l'application |
+|---|---|---|
+| **Analyse de sensibilité** | Étude de la façon dont une conclusion change si l'on s'écarte de l'hypothèse MAR. | Mécanisme du manque → Sensibilité MNAR |
+| **Appariement prédictif** (*PMM*) | Méthode d'imputation qui emprunte la valeur observée d'un individu dont la prédiction est voisine. Méthode par défaut de MICE. | Traitements; Qualité de l'imputation |
+| **Auxiliaire (variable)** | Variable absente de l'analyse finale, ajoutée au modèle d'imputation parce qu'elle est liée aux valeurs manquantes ou au fait de manquer. | Bac à sable : *Modèle d'imputation* |
+| **Biais** | Écart moyen entre l'estimation et la vraie valeur, sur de nombreux échantillons. | Traitements (un tirage); Étude de simulation (moyenne de R tirages) |
+| **Cas complets** (*listwise*) | Analyse limitée aux lignes sans aucune valeur manquante. | Traitements; Bac à sable |
+| **Cas incomplet** | Ligne comportant au moins une valeur manquante. | Cartouche *Cas incomplets* |
+| **Congénialité** | Compatibilité entre le modèle d'imputation et le modèle d'analyse. | — |
+| **Convergence** | Stabilisation des chaînes de l'algorithme MICE au fil des itérations. | Qualité de l'imputation, carte 2 |
+| **Couverture** | Proportion des intervalles de confiance qui contiennent la vraie valeur; 95 % visés. | Étude de simulation |
+| **Delta-ajustement** | Décalage de $\delta$ écart-type appliqué aux seules valeurs imputées, pour simuler un écart à MAR. | Sensibilité MNAR |
+| **Efficacité** | Faible dispersion des estimations d'un échantillon à l'autre (écart-type empirique). | Étude de simulation |
+| **Erreur de Monte Carlo** | Incertitude d'un résultat de simulation due au nombre fini de réplications. | Étude de simulation, *Interprétation* |
+| **Erreur-type naïve** | Erreur-type calculée après une imputation unique, comme si les valeurs imputées étaient observées. Trop petite. | Bac à sable, carte *Impact* |
+| **FIML** | Maximum de vraisemblance à information complète : estime les paramètres sur les données incomplètes, sans imputer. | Traitements |
+| **Ignorable (mécanisme)** | Mécanisme MAR (ou MCAR) dont les paramètres sont distincts de ceux du modèle : on peut l'ignorer pour estimer. | — |
+| **Imputation déterministe** | Remplacement par la valeur prédite par une régression, sans résidu. | Mécanisme et traitement; Traitements |
+| **Imputation multiple** | Imputation répétée $m$ fois avec une part aléatoire, analyses parallèles et mise en commun. | Traitements; Étude de simulation |
+| **Imputation par la moyenne** | Remplacement de chaque valeur manquante par la moyenne observée. | Bac à sable; Traitements |
+| **Imputation stochastique** | Valeur prédite plus un résidu aléatoire. | Bac à sable (*régression + erreur*); Mécanisme et traitement |
+| **Indicateur de réponse** $R$ / **de manque** $M$ | $R = 1$ si la valeur est observée; $M = 1 - R$ vaut 1 si elle manque. | Matrices *Signature* et *manque ↔ variables* |
+| **MAR** | Manque qui dépend seulement de valeurs observées. | Partout : mécanisme *MAR* |
+| **MCAR** | Manque qui ne dépend d'aucune valeur. | Partout : mécanisme *MCAR* |
+| **MICE** | Imputation multiple par équations chaînées : chaque variable incomplète est imputée à partir des autres, en cycles. | Qualité de l'imputation |
+| **MNAR** (ou NMAR) | Manque qui dépend des valeurs manquantes elles-mêmes. | Partout : mécanisme *NMAR (MNAR)* |
+| **Monotone (patron)** | Patron où, dès qu'une variable manque, les suivantes manquent aussi. | Structure du manque |
+| **Paires disponibles** (*pairwise*) | Chaque statistique calculée sur toutes les lignes où ses variables sont observées. | Traitements |
+| **Patron de manque** | Combinaison de variables observées et manquantes sur une ligne. | Structure du manque |
+| **Prédicteur du manque** | Variable dont dépend la probabilité qu'une autre variable manque. | Données & visualisation : *Prédicteur du manque* |
+| **Règles de Rubin** | Formules de mise en commun : $\bar Q$, $\bar U$, $B$, $T = \bar U + (1 + 1/m)B$. | Traitements; Qualité de l'imputation, carte 3 |
+| **Seuil de fragilité** | Plus petit $\delta$ pour lequel une conclusion change. | Sensibilité MNAR, *Interprétation* |
+| **Test de Little** | Test de l'hypothèse MCAR comparant les moyennes des patrons à l'estimation EM. | Mécanisme du manque → Diagnostic; Données réelles |
+| **Variance inter-imputation** $B$ | Variance des estimations d'un jeu imputé à l'autre; mesure l'incertitude due au manque. | — (voir @sec-imputation-multiple) |
+| **Variance intra-imputation** $\bar U$ | Moyenne des variances obtenues sur chaque jeu imputé. | — |
+
+: Glossaire des termes du manuel. {#tbl-glossaire}
+
+## Onglets, sous-onglets et contrôles
+
+| Onglet → sous-onglet | Contrôles principaux | Sorties principales | Chapitres |
+|---|---|---|---|
+| Introduction → Concepts | — | Trois mécanismes, tableau de synthèse, guide des onglets | 1, 2 |
+| Introduction → Bac à sable | Mécanisme, nombre de valeurs manquantes, vue, imputation, modèle d'imputation, autre tirage | Tableau de 20 lignes, *Impact*, *Signature*, nuage, explication | 1, 2 |
+| Introduction → Quiz | Réponse, Valider, Question suivante, Recommencer | Explication, score | 2 |
+| Données & visualisation | N, nombre de variables, ρ, graine, mécanisme, proportion, mode guidé, portée, variable(s), prédicteur, sens, patron | Cartouches, *Ce que vous avez simulé*, bandeau *Réglages modifiés* | 3 |
+| → Données | — | Jeu amputé, résumé numérique | 3 |
+| → Structure du manque | — | Carte, patrons, fréquence des patrons, % par variable | 3 |
+| → Mécanisme et traitement | Variable examinée, abscisse, variable, méthode illustrée | Nuage de sélectivité, effet d'une imputation sur la distribution | 3, 5 |
+| Traitements | Quantité à estimer, variables, *m*, Comparer, rapport HTML | Comparaison des estimations, biais, dispersion, interprétation | 5, 6, 7 |
+| Mécanisme du manque → Diagnostic | — | Test de Little, démonstration, limite, matrice manque ↔ variables | 4 |
+| Mécanisme du manque → Sensibilité MNAR | Variable, amplitude de δ, *m* | Courbe de sensibilité, seuils de fragilité | 10 |
+| Évaluer et valider → Étude de simulation | Quantité, R, *m* | Distributions, couverture, intervalles, synthèse | 8 |
+| Évaluer et valider → Qualité de l'imputation | Variable, *m*, *maxit* | Observé/imputé, convergence, effet de *m* | 9 |
+| Données réelles | Jeu, variable, abscisse, *m* | Description, carte, patrons, Little, observé/imputé, leçon | 12 |
+
+: Où trouver quoi dans simManquant. {#tbl-ecrans}

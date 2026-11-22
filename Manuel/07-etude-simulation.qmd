@@ -1,0 +1,138 @@
+# Étude de simulation : biais, efficacité, couverture {#sec-etude-simulation}
+
+Un seul jeu de données ne révèle qu'une facette d'une méthode. Pour la juger, il faut
+observer son comportement sur de nombreux échantillons — une **étude de simulation**
+de Monte Carlo. Ce chapitre distingue trois propriétés que l'on confond souvent : le
+biais, l'efficacité et la couverture. Il correspond au sous-onglet **Étude de
+simulation** de l'onglet **Évaluer et valider**.
+
+## D'une estimation à une distribution
+
+Les chapitres précédents comparaient des méthodes sur un échantillon unique. Mais une
+estimation est une variable aléatoire : elle change d'un échantillon à l'autre. En
+répétant $R$ fois le cycle *simuler → amputer → traiter*, on reconstruit la
+**distribution d'échantillonnage** de chaque méthode, et l'on peut alors en mesurer
+les propriétés.
+
+## Trois propriétés à distinguer
+
+Soit $\hat{Q}_r$ l'estimation d'un paramètre $Q$ obtenue à la $r$-ième réplication.
+
+- Le **biais** est l'écart systématique moyen : $\overline{\hat{Q}} - Q$. Un
+  estimateur non biaisé vise juste *en moyenne*.
+- L'**efficacité** se lit dans la dispersion des estimations, l'**écart-type
+  empirique** $\operatorname{sd}(\hat{Q}_r)$. À biais égal, on préfère l'estimateur le
+  moins dispersé.
+- La **couverture** est la proportion des intervalles de confiance à 95 % qui
+  contiennent la vraie valeur $Q$. Une méthode honnête couvre environ 95 % du temps.
+
+Ces trois propriétés sont indépendantes : une méthode peut être non biaisée mais
+inefficace, ou non biaisée mais mal couvrir si elle sous-estime son incertitude.
+
+## Le protocole de Monte Carlo
+
+On fixe la vérité en simulant des variables de moyenne nulle : le paramètre visé est
+$Q = 0$. À chaque réplication, on tire un nouvel échantillon, on l'ampute selon le
+mécanisme choisi, on applique chaque méthode, et l'on enregistre l'estimation, son
+erreur-type et son intervalle. Après $R$ réplications, on résume les trois propriétés
+par méthode.
+
+::: {.callout-warning}
+**Le tirage doit changer à chaque réplication.** Si l'on figeait le hasard,
+les $R$ jeux seraient identiques et la distribution d'échantillonnage s'effondrerait
+en un point — l'erreur classique de ce type d'étude. Dans l'application, chaque
+réplication repart d'un tirage neuf ; c'est ce qui donne du sens à la dispersion
+observée.
+:::
+
+## Résultats sous MAR
+
+Dans le scénario MAR par défaut, l'analyse des cas complets est fortement biaisée
+pour la quantité étudiée et sa couverture se détériore. L'imputation par la moyenne
+fait pire encore : biaisée **et** trop confiante (son erreur-type moyenne est
+inférieure à la dispersion réelle). L'imputation multiple est proche de l'absence de
+biais et correctement calibrée lorsque le mécanisme et le modèle d'imputation sont
+bien spécifiés. Changez le scénario et les résultats peuvent changer : c'est
+précisément l'intérêt de l'étude.
+
+::: {.app}
+**À l'application —** Onglet **Évaluer et valider**, sous-onglet **Étude de
+simulation**. Réglez la *Quantité étudiée* sur la moyenne, un *Nombre de réplications
+(R)* et des *Imputations par réplication (m)*, puis *Lancer l'étude*. Lisez la carte
+*Distribution d'échantillonnage des estimations*, puis la *Synthèse*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** Les distributions des *cas complets* et de l'*imputation par
+la moyenne* sont décalées par rapport à la vérité (biais) ; celle de l'*imputation
+multiple* est centrée. Dans la *Synthèse*, la colonne *Couverture* s'effondre pour les
+méthodes naïves et se tient près de 95 % pour l'imputation multiple.
+:::
+
+## Lire l'écran : une étude de Monte Carlo est une distribution, pas un verdict
+
+L'onglet **Étude de simulation** présente quatre sorties complémentaires. Lisez-les
+dans cet ordre, car elles répondent à quatre questions différentes.
+
+| Sortie | Question | Lecture | Limite |
+|---|---|---|---|
+| **Distribution d'échantillonnage** | Les estimations sont-elles centrées sur la vérité ? | Centre décalé = biais; nuage étalé = faible efficacité. | Avec peu de réplications, le centre apparent est lui-même bruité. |
+| **Couverture des IC à 95 %** | Les intervalles contiennent-ils la vérité environ 95 % du temps ? | Sous-couverture = inférence trop optimiste ou biaisée. | 95 % est une cible à long terme, non un chiffre exact à chaque lancement. |
+| **Chaque intervalle** | Comment se produisent les échecs de couverture ? | Les traits qui ne croisent pas la vérité rendent visible le taux résumé. | L'ordre des réplications n'a pas de sens substantif. |
+| **Synthèse** | Biais, dispersion empirique, erreur-type moyenne et couverture concordent-ils ? | L'erreur-type moyenne doit refléter l'écart-type empirique. | Ce diagnostic ne vaut que pour le scénario simulé. |
+
+Une bonne lecture relie toujours les colonnes : une méthode peut être centrée mais
+sous-couvrir parce qu'elle sous-estime son erreur-type; elle peut aussi couvrir mal
+parce qu'elle est biaisée. Le mot « meilleure » n'a de sens qu'après avoir précisé la
+propriété que l'on compare.
+
+## Isoler la couverture : le cas MCAR
+
+Pour séparer nettement le biais de la couverture, plaçons-nous sous MCAR, où, pour la
+moyenne étudiée ici, les méthodes visent juste en moyenne. Le résultat est frappant :
+l'imputation par la moyenne est **non biaisée** pour cette cible, et pourtant sa
+couverture chute nettement sous 95 %. La cause se lit dans la comparaison de deux
+écarts-types : l'**erreur-type moyenne** qu'affiche la méthode est bien plus petite
+que l'**écart-type empirique**, la vraie dispersion de ses estimations. La méthode se
+croit plus précise qu'elle ne l'est.
+
+::: {.callout-tip}
+Une méthode peut viser juste et néanmoins tromper. La couverture ne dépend pas que du
+biais : elle exige que l'erreur-type reflète la vraie variabilité. C'est précisément
+ce que l'imputation multiple garantit, en ajoutant la variance inter-imputation $B$
+(@sec-imputation-multiple), et ce que l'imputation simple néglige.
+:::
+
+::: {.app}
+**À l'application —** Toujours dans l'**Étude de simulation**, examinez la carte
+*Voir la couverture : chaque intervalle, réplication par réplication*, puis lisez
+l'*Interprétation* sous la synthèse.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** Chaque trait horizontal est un intervalle de confiance ; le
+trait vertical est la vérité. Pour l'imputation par la moyenne, une **foule**
+d'intervalles ratent la vérité (en rouge) alors même que la méthode est *non biaisée*
+sous MCAR — leurs intervalles sont simplement trop courts. Pour l'imputation
+multiple, environ 1 sur 20 rate, comme il se doit. L'*Interprétation* traduit ce taux
+en conséquence : « rater la vérité 1 fois sur $N$ » est le prix concret d'erreurs-types
+malhonnêtes.
+:::
+
+## Exercices {.unnumbered}
+
+**7.1** *(Étude de simulation.)* Sous MCAR, augmentez le *Nombre de réplications (R)*
+de 200 à 1000. La couverture de l'imputation multiple se rapproche-t-elle de 95 % ?
+Le pourcentage affiché devient-il plus stable d'un lancement à l'autre ? Qu'en
+déduisez-vous sur la précision d'une couverture estimée sur peu de réplications ?
+*(Solution : @sec-sol-simulation.)*
+
+**7.2** L'imputation par régression **stochastique**, appliquée **une seule fois**,
+produit des valeurs plausibles et un écart-type correct (@sec-cas-complets). Sa
+*couverture* serait-elle pour autant correcte ? Expliquez pourquoi une imputation
+unique, même stochastique, sous-estime encore l'incertitude — quel terme des règles
+de Rubin lui manque-t-il ?
+
+**7.3** *(Étude de simulation.)* Sous MAR, faites varier la *Proportion de cas
+incomplets* de 0,2 à 0,6. Comment évoluent le biais des cas complets et la couverture
+de l'imputation multiple à mesure que le manque s'étend ?

@@ -1,0 +1,31 @@
+% preamble.tex — en-tête LaTeX pour la sortie PDF (moteur LuaLaTeX)
+% Quarto charge déjà booktabs, longtable, etc. ; on ajoute quelques réglages sûrs.
+
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{eso-pic}
+
+% Légendes compactes ; le caractère % dans une légende doit être écrit \%
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf}
+
+% Interligne légèrement aéré
+\usepackage{setspace}
+\setstretch{1.05}
+
+% Rappels (voir la préface) :
+%  - éviter les indices Unicode (₁, ₒ) dans le texte ou les figures destinés au PDF ;
+%    écrire les indices en LaTeX, p. ex. $Y_{\text{obs}}$, $t_1$.
+%  - échapper le pourcentage dans les légendes et le texte : 30\%.
+
+% Encadrés pédagogiques (filtre encadres.lua) : « À l'application » et « Ce qu'on doit voir »
+\usepackage[most]{tcolorbox}
+\definecolor{appfond}{HTML}{E6F6F4}\definecolor{appbord}{HTML}{17A398}
+\definecolor{voirfond}{HTML}{FDF1E5}\definecolor{voirbord}{HTML}{D95F0E}
+\newtcolorbox{encadreapp}{enhanced, breakable, frame hidden, boxrule=0pt, sharp corners,
+  colback=appfond, borderline west={3pt}{0pt}{appbord}, left=8pt, right=6pt, top=4pt, bottom=4pt,
+  before skip=8pt, after skip=8pt}
+\newtcolorbox{encadrevoir}{enhanced, breakable, frame hidden, boxrule=0pt, sharp corners,
+  colback=voirfond, borderline west={3pt}{0pt}{voirbord}, left=8pt, right=6pt, top=4pt, bottom=4pt,
+  before skip=8pt, after skip=8pt}

@@ -1,0 +1,63 @@
+# Conclusion {#sec-conclusion .unnumbered}
+
+Au terme de ce parcours, une idée domine, celle par laquelle nous avons commencé :
+face à des données manquantes, la question décisive n'est pas *combien* manquent, mais
+*pourquoi*. Tout le reste — le choix d'une méthode, sa validité, l'interprétation des
+résultats — en découle.
+
+## La démarche en bref
+
+Les chapitres précédents se résument en une suite de décisions.
+
+- **Décrire** le manque : sa proportion, sa localisation, ses patrons
+  (@sec-simuler-visualiser).
+- **Diagnostiquer** : tester MCAR par le test de Little, en gardant à l'esprit qu'aucun
+  test ne distingue MAR de NMAR (@sec-diagnostic-little).
+- **Raisonner** sur le mécanisme plausible à partir du contexte, puisque les données
+  seules ne tranchent pas (@sec-mecanismes).
+- **Traiter** : ne pas accepter les cas complets ou une imputation simple par
+  automatisme; évaluer leur cible et leurs hypothèses. Sous MAR défendable,
+  privilégier l'imputation multiple ou le FIML avec un modèle d'imputation soigné
+  (@sec-imputation-multiple, @sec-fiml, @sec-autres).
+- **Évaluer et valider** : distinguer biais, efficacité et couverture
+  (@sec-etude-simulation) ; vérifier la qualité de l'imputation faute de vérité
+  (@sec-qualite-imputation).
+- **Encadrer** l'incertitude résiduelle : en cas de doute NMAR, mener une analyse de
+  sensibilité plutôt que de trancher (@sec-sensibilite-mnar).
+
+## Trois messages à retenir
+
+D'abord, **l'imputation simple trompe souvent** : elle rétrécit la variance et
+sous-estime l'incertitude, même lorsqu'elle semble viser juste. Ensuite,
+**l'imputation multiple et le FIML ne sont pas magiques** : ils reposent sur une
+hypothèse MAR défendable et sur un modèle adéquat; les variables auxiliaires rendent
+cette hypothèse plus crédible, sans la prouver. Enfin, **le NMAR ne se teste pas, il
+se raisonne** : l'analyse de sensibilité y remplace la certitude par l'honnêteté.
+
+## Un canevas de rédaction
+
+Une analyse de données manquantes devient transparente lorsque le rapport sépare les
+faits observés des hypothèses et des choix. Adaptez le canevas suivant à votre étude :
+
+> Parmi les $N$ observations, **… %** comportaient au moins une valeur manquante;
+> le manque concernait surtout **…** et les patrons les plus fréquents étaient
+> **…**. Le test de Little a **[rejeté / n'a pas rejeté]** MCAR (*p* = **…**), ce
+> qui **[est / n'est pas]** compatible avec une absence complète de structure, sans
+> départager MAR et MNAR. Compte tenu de **[processus de collecte et variables
+> observées]**, nous avons retenu une analyse sous MAR et inclus **[issue,
+> prédicteurs et auxiliaires]** dans le modèle d'imputation. Les diagnostics ont
+> montré **[plausibilité des valeurs, convergence, stabilité]**. Une analyse de
+> sensibilité MNAR **[a / n'a pas]** modifié la conclusion pour la plage **…**.
+
+Ce canevas n'exige pas de longues pages techniques. Il rend toutefois visible le
+raisonnement qui relie les sorties de l'application à une conclusion statistique
+défendable.
+
+## Pour aller plus loin
+
+Ce manuel n'est qu'une introduction. Pour approfondir, on consultera van Buuren
+[-@vanbuuren2018], ouvrage de référence sur l'imputation multiple; Enders
+[-@enders2022], particulièrement clair sur le FIML ;
+et Little et Rubin [-@littleRubin2019], le traité fondateur du domaine. L'application
+*simManquant* accompagne ces lectures en permettant d'expérimenter, en direct, chacun
+des concepts abordés ici.

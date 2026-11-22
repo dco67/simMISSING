@@ -1,0 +1,28 @@
+/* styles.css — encadrés pédagogiques du guide simManquant (HTML et EPUB) */
+
+.app, .voir {
+  border-left: 5px solid;
+  border-radius: 4px;
+  padding: 0.7em 1em 0.2em 1em;
+  margin: 1.1em 0;
+}
+
+/* « À l'application » : le geste à faire */
+.app {
+  background: #e6f6f4;
+  border-color: #17a398;
+}
+
+/* « Ce qu'on doit voir » : l'observation attendue */
+.voir {
+  background: #fdf1e5;
+  border-color: #d95f0e;
+}
+
+.app p:last-child, .voir p:last-child { margin-bottom: 0.6em; }
+
+/* Captures d'écran : léger cadre */
+.quarto-figure img[src*="cap-"] {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}

@@ -1,0 +1,202 @@
+# Un exemple guidé, de la question au compte rendu {#sec-exemple-guide}
+
+Les chapitres précédents ont isolé chaque outil. Celui-ci les enchaîne sur un seul
+cas, du début à la fin, dans l'ordre où on les utiliserait pour une vraie analyse :
+décrire, diagnostiquer, traiter, évaluer, vérifier, encadrer, rédiger. Chaque étape
+pose une question; essayez d'y répondre avec l'application avant d'ouvrir la
+réponse.
+
+## Le cas
+
+Une organisation mesure le **bien-être au travail** ($X_1$) de 500 employés, ainsi que
+trois autres variables recueillies dans les dossiers administratifs : l'**ancienneté**
+($X_2$), le **nombre d'heures de formation** ($X_3$) et un **indice de charge**
+($X_4$), toutes centrées et réduites. Le questionnaire de bien-être est facultatif.
+Les responsables soupçonnent que les employés récemment arrivés y répondent moins :
+le manque de $X_1$ dépendrait de l'ancienneté, une variable **observée pour tous**.
+
+La question substantive est simple : **quel est le bien-être moyen ?** On le
+compare à 0, la valeur moyenne de l'organisation l'année précédente.
+
+::: {.app}
+**À l'application —** Onglet **Données & visualisation**. *N* = 500, 4 variables,
+ρ = 0,4; graine **3031**, *Fixer la graine* cochée. Mécanisme **MAR**, proportion
+de cas incomplets **0,30**, mode guidé, portée *Une seule*, variable rendue
+manquante $X_1$, prédicteur $X_2$, **valeurs faibles vers manque**. Cliquez sur
+*Simuler / rééchantillonner*.
+:::
+
+Puisque les données sont simulées, nous connaissons la vérité : la vraie moyenne de
+$X_1$ sur les 500 employés vaut 0,059. Sur de vraies données, cette information
+n'existerait pas. Nous la gardons de côté pour juger, à la fin, de ce que chaque
+étape a permis de conclure.
+
+## Étape 1 — Décrire le manque
+
+*Combien de valeurs manquent, où, et que vaut la moyenne des répondants ?*
+
+::: {.callout-tip collapse="true" title="Réponse"}
+Les cartouches indiquent **30,4 %** de cas incomplets et **7,6 %** de cellules
+manquantes : 152 employés n'ont pas répondu, et $X_1$ est la seule variable
+touchée (*% manquant par variable*). La structure est **univariée** : deux patrons
+seulement, complet (348 lignes) et « $X_1$ manquante » (152 lignes). Dans le
+*Résumé numérique*, la moyenne des 348 valeurs observées de $X_1$ vaut **0,149**.
+:::
+
+## Étape 2 — Diagnostiquer
+
+*Le manque est-il compatible avec MCAR ? À quelles variables observées est-il lié ?*
+
+::: {.app}
+**À l'application —** Onglet **Mécanisme du manque**, sous-onglet **Diagnostic**.
+:::
+
+::: {.callout-tip collapse="true" title="Réponse"}
+Le test de Little donne $d^2 = 43{,}60$ avec 3 degrés de liberté, $p < 0{,}001$ :
+**MCAR est rejeté**. La *Matrice manque ↔ variables* montre que le manque de $X_1$
+est surtout lié à $X_2$ (corrélation −0,29 : moins d'ancienneté, plus de manque),
+plus faiblement à $X_3$ et $X_4$ (−0,15). Le test ne dit pas si le manque est MAR
+ou MNAR; mais le lien avec l'ancienneté, observée pour tous, est cohérent avec
+l'hypothèse des responsables. **Décision** : analyser sous MAR, en incluant $X_2$,
+$X_3$ et $X_4$ dans le modèle d'imputation, et prévoir une analyse de sensibilité.
+:::
+
+## Étape 3 — Traiter
+
+*Que valent la moyenne de $X_1$ selon les cas complets, l'imputation par la
+moyenne, l'imputation multiple et le FIML ?*
+
+::: {.app}
+**À l'application —** Onglet **Traitements**, *Moyenne d'une variable*, $X_1$,
+*m* = 10, *Comparer les méthodes*.
+:::
+
+::: {.callout-tip collapse="true" title="Réponse"}
+| Méthode | Estimation | Biais (connu en simulation) |
+|---|---|---|
+| Cas complets | 0,149 | +0,090 |
+| Imputation par la moyenne | 0,149 | +0,090 |
+| Régression stochastique | 0,043 | −0,016 |
+| Imputation multiple | 0,087 | +0,029 |
+| FIML | 0,071 | +0,012 |
+
+Les cas complets **surestiment** le bien-être : les non-répondants, peu anciens,
+avaient un bien-être plus faible (puisque $X_1$ et $X_2$ sont liées). L'imputation
+multiple et le FIML corrigent l'essentiel du biais. Le tableau de dispersion confirme
+que l'imputation par la moyenne écrase l'écart-type (0,838 contre 1,006), alors que
+l'imputation multiple le préserve (0,995).
+:::
+
+## Étape 4 — Évaluer les méthodes sur le long terme
+
+*Sur ce tirage, l'imputation multiple s'écarte encore de +0,029. Est-ce un biais de
+la méthode, ou le hasard de ce jeu ?*
+
+::: {.app}
+**À l'application —** Onglet **Évaluer et valider**, sous-onglet **Étude de
+simulation**, *Moyenne d'une variable* ($X_1$), *R* = 200, *m* = 5, *Lancer
+l'étude*.
+:::
+
+::: {.callout-tip collapse="true" title="Réponse"}
+Sur 200 réplications du même scénario, le biais moyen de l'imputation multiple vaut
+**−0,007**, non distinguable de 0, et sa couverture **95 %**. Les cas complets
+gardent un biais de +0,089 et ne couvrent que 63,5 %; l'imputation par la moyenne,
+biaisée et trop confiante, 35 %. L'écart de +0,029 observé à l'étape 3 était donc un
+**accident de tirage**, du même ordre que l'erreur-type (environ 0,05) : c'est
+exactement pourquoi un seul jeu ne classe pas les méthodes.
+:::
+
+## Étape 5 — Vérifier l'imputation
+
+*Les valeurs imputées sont-elles plausibles ? L'algorithme a-t-il convergé ?*
+
+::: {.app}
+**À l'application —** Sous-onglet **Qualité de l'imputation**, variable $X_1$,
+*m* = 10, *maxit* = 20, *Lancer l'imputation*.
+:::
+
+::: {.callout-tip collapse="true" title="Réponse"}
+Les densités imputées restent dans le registre des valeurs observées, **décalées
+vers la gauche** : les non-répondants ont une ancienneté plus faible, donc un
+bien-être prédit plus faible. Ce décalage est la correction attendue sous MAR. Les
+chaînes de convergence s'entrelacent sans tendance; l'estimation et l'erreur-type se
+stabilisent avant $m = 10$. Rien n'indique un problème technique.
+:::
+
+## Étape 6 — Encadrer un éventuel MNAR
+
+*Et si les employés en difficulté évitaient le questionnaire à cause de leur
+bien-être lui-même, au-delà de leur ancienneté ? La conclusion tiendrait-elle ?*
+
+::: {.app}
+**À l'application —** Onglet **Mécanisme du manque**, sous-onglet **Sensibilité
+MNAR**, variable $X_1$, amplitude ±1,5, *m* = 10, *Lancer l'analyse*.
+:::
+
+::: {.callout-tip collapse="true" title="Réponse"}
+À $\delta = 0$ (MAR), l'estimation vaut 0,087, avec un intervalle
+[−0,028 ; 0,203] qui contient 0 : le bien-être moyen **ne se distingue pas** de
+celui de l'année précédente. Cette conclusion est **fragile vers le haut** : dès
+$\delta = +0{,}125$, l'intervalle devient entièrement positif. Elle est plus solide
+vers le bas : il faut $\delta = -0{,}75$ pour qu'il devienne entièrement négatif.
+Or le scénario redouté — les employés en difficulté s'abstiennent — correspond à un
+$\delta$ **négatif** (les valeurs manquantes seraient plus basses que ne le prédit
+MAR). Dans ce sens, la conclusion « pas de différence » résiste jusqu'à un décalage
+de trois quarts d'écart-type, ce qui est considérable.
+:::
+
+## Étape 7 — Rédiger
+
+Voici le compte rendu qui découle de ces étapes, selon le canevas de la conclusion
+([conclusion](14-conclusion.qmd)). Il distingue les faits observés, les hypothèses et les choix.
+
+> Parmi les 500 employés, **30,4 %** n'ont pas répondu au questionnaire de
+> bien-être; aucune autre variable ne comportait de valeur manquante. Le test de
+> Little a **rejeté** MCAR ($d^2 = 43{,}6$, 3 ddl, *p* < 0,001), et le manque était
+> surtout associé à une faible ancienneté. Compte tenu de ce lien et du caractère
+> facultatif du questionnaire, nous avons retenu une analyse sous MAR et une
+> imputation multiple (appariement prédictif, *m* = 10) incluant l'ancienneté, les
+> heures de formation et l'indice de charge. Les diagnostics ont montré des valeurs
+> imputées plausibles et une convergence satisfaisante. Le bien-être moyen estimé
+> vaut **0,09** (IC à 95 % : −0,03 à 0,20), ce qui ne diffère pas de la valeur de
+> l'année précédente; la moyenne des seuls répondants (0,15) le surestimait. Une
+> analyse de sensibilité par delta-ajustement montre que cette conclusion tient tant
+> que les non-répondants n'ont pas un bien-être inférieur de plus de 0,75 écart-type
+> à ce que prédit le modèle MAR.
+
+::: {.callout-note}
+Le compte rendu ne mentionne ni la « vérité » ni l'étude de simulation : sur de vraies
+données, elles n'existent pas. L'étape 4 sert ici à **apprendre** que l'écart d'un
+tirage n'est pas un biais; dans une étude réelle, on s'appuie à sa place sur la
+littérature méthodologique, qui établit les propriétés de l'imputation multiple sous
+MAR.
+:::
+
+## Et si le manque avait été MNAR ?
+
+Refaites l'exemple en changeant une seule chose : le mécanisme **NMAR (MNAR)**,
+toujours avec la graine 3031 et les valeurs faibles vers manque. Le bien-être manque
+alors parce qu'il est faible, quelle que soit l'ancienneté.
+
+::: {.callout-tip collapse="true" title="Ce qu'on observe"}
+Les étapes 1 à 3 se ressemblent : MCAR est rejeté, le manque est lié aux variables
+observées (indirectement, par leur corrélation avec $X_1$), et l'imputation multiple
+corrige une partie du biais des cas complets. Mais l'étape 4 change de verdict :
+l'étude de simulation montre que l'imputation multiple garde un **biais net** et que
+sa couverture chute. Rien, dans les étapes 1, 2, 3 et 5, ne permettait de le voir :
+seule l'analyse de sensibilité de l'étape 6 encadre ce risque. C'est la leçon centrale
+du manuel.
+:::
+
+## Exercices {.unnumbered}
+
+**11.1** Reprenez l'exemple avec la proportion de cas incomplets à 0,50. Quelles
+étapes changent de conclusion ? *(Solution : @sec-sol-exemple.)*
+
+**11.2** À l'étape 3, la régression stochastique (0,043) tombe plus près de la vérité
+que l'imputation multiple (0,087). Faut-il en conclure qu'elle est meilleure ?
+Appuyez votre réponse sur l'étape 4 et sur le @sec-etude-simulation.
+
+**11.3** Réécrivez le compte rendu de l'étape 7 pour un lecteur non spécialiste, en
+trois phrases, sans perdre l'hypothèse MAR ni la limite de sensibilité.

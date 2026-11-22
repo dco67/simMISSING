@@ -1,0 +1,101 @@
+# L'analyse de sensibilité sous NMAR {#sec-sensibilite-mnar}
+
+Le @sec-diagnostic-little l'a établi : on ne peut pas *tester* un mécanisme NMAR. On
+n'est pourtant pas démuni. Plutôt que de trancher, on **encadre** l'effet d'un
+éventuel manque non aléatoire sur les conclusions : c'est l'analyse de sensibilité.
+Ce chapitre présente le delta-ajustement [@vanbuuren2018]. Il correspond au sous-onglet
+**Sensibilité MNAR** de l'onglet **Mécanisme du manque**.
+
+## Le principe du delta-ajustement
+
+L'idée est simple. On impute d'abord sous l'hypothèse MAR. Puis on suppose que les
+valeurs réellement manquantes sont systématiquement **décalées** d'une quantité
+$\delta$ par rapport à ce que MAR prédit — par exemple, plus élevées si l'on redoute
+que les grandes valeurs manquent davantage. On applique ce décalage aux seules
+valeurs imputées, on refait l'analyse, et l'on **balaie une plage de $\delta$**
+(commodément exprimé en écarts-types de la variable).
+
+Le paramètre $\delta$ encode l'ampleur du manque non aléatoire redouté : $\delta = 0$
+correspond exactement à MAR. En le faisant varier, on répond à la question qui
+importe vraiment : *mes conclusions résistent-elles à un écart plausible par rapport
+à MAR ?*
+
+Le signe de $\delta$ doit être interprété dans l'échelle de la variable. Un
+$\delta$ positif suppose ici que les valeurs manquantes sont, toutes choses égales
+par ailleurs, plus élevées que ne le prédit MAR; un $\delta$ négatif suppose
+l'inverse. La plage ne se choisit pas parce qu'elle « couvre large », mais à partir
+de connaissances de domaine, d'études externes ou d'un scénario de non-réponse
+explicite.
+
+## La courbe de sensibilité
+
+On trace l'estimation et son intervalle de confiance en fonction de $\delta$. Chaque
+point de la courbe est une analyse complète : imputer sous MAR, décaler les imputées
+de $\delta$, mettre en commun par les règles de Rubin. En simulation, où les données
+sont fabriquées, on peut superposer la **vraie** moyenne : la courbe la traverse au
+$\delta$ correspondant au véritable mécanisme.
+
+L'estimation sous MAR ($\delta = 0$) est biaisée ; la vraie moyenne aurait été
+retrouvée pour un certain **$\delta$ récupérateur** — positif ici, puisque le manque
+touche les valeurs élevées de la variable. En pratique, ce $\delta$ est **inconnu** :
+la courbe ne dit pas où est la vérité, seulement de combien la conclusion bougerait
+selon l'ampleur du décalage.
+
+::: {.app}
+**À l'application —** Onglet **Mécanisme du manque**, sous-onglet **Sensibilité
+MNAR**. Choisissez la *Variable suspectée MNAR*, réglez l'*Amplitude de δ explorée* et
+le *Nombre d'imputations (m)*, puis *Lancer l'analyse*. Lisez la carte *Courbe de
+sensibilité* et son *Interprétation*.
+:::
+
+::: {.voir}
+**Ce qu'on doit voir —** À $\delta = 0$ (l'hypothèse MAR), l'estimation est décalée
+par rapport à la vérité. En balayant $\delta$, la courbe **traverse** la vraie
+moyenne au décalage correspondant au véritable mécanisme — un repère qui n'existe
+qu'en simulation. Sur de vraies données, on ne dispose que de la courbe : elle dit de
+combien la conclusion bougerait, pas où se trouve la vérité.
+:::
+
+## Lecture décisionnelle
+
+::: {.callout-tip}
+L'analyse de sensibilité ne cherche pas la « bonne » valeur de $\delta$ — invérifiable
+— mais la **robustesse** de la conclusion. Si le signe ou la décision reste stable sur
+toute une plage plausible de $\delta$, la conclusion est robuste. S'il bascule pour un
+$\delta$ modeste, elle est fragile et doit être présentée avec prudence.
+:::
+
+La démarche recommandée [@vanbuuren2018] consiste donc à rapporter la courbe de
+sensibilité, à justifier la plage de $\delta$ jugée plausible par un **argument de
+fond** sur le processus de manque, et à conclure sur la stabilité — ou l'instabilité —
+des résultats à l'intérieur de cette plage.
+
+## Lire l'écran : une courbe conditionnelle à un scénario
+
+Pour lire la carte **Courbe de sensibilité**, commencez par le point $\delta = 0$ :
+il correspond à l'analyse sous MAR. Déplacez-vous ensuite vers les valeurs positives
+et négatives et relevez le premier $\delta$ où la conclusion pertinente change —
+par exemple un intervalle qui franchit zéro, un effet qui passe sous un seuil ou une
+décision de classement qui s'inverse. Ce point est un **seuil de fragilité**, pas une
+estimation de la vraie valeur de $\delta$.
+
+En simulation, la ligne de vérité et le « $\delta$ récupérateur » servent uniquement
+à enseigner la mécanique. En pratique, ils disparaissent. Un rapport rigoureux donne
+la plage explorée, sa justification et ce qui reste stable à l'intérieur de cette
+plage; il ne prétend jamais avoir identifié le mécanisme MNAR.
+
+## Exercices {.unnumbered}
+
+**9.1** *(Sensibilité MNAR.)* Appliquez l'analyse à une variable dont le manque est en
+réalité **MAR** (piloté par une autre variable). Le $\delta$ récupérateur — celui où la
+courbe croise la vérité — est-il proche de zéro ? Pourquoi est-ce précisément ce
+qu'on attend quand le vrai mécanisme est MAR ? *(Solution : @sec-sol-sensibilite.)*
+
+**9.2** *(Sensibilité MNAR.)* Élargissez l'*Amplitude de δ explorée* jusqu'à $[-3, 3]$.
+Au-delà de quelle amplitude l'intervalle de confiance de l'estimation cesse-t-il de
+contenir la valeur nulle ? Que dit ce seuil sur la robustesse de la conclusion « la
+moyenne diffère de 0 » ?
+
+**9.3** Fixez un seuil décisionnel — par exemple « la moyenne dépasse-t-elle 0,1 ? » —
+et repérez sur la courbe le $\delta$ à partir duquel la conclusion change. En deçà de
+ce $\delta$, diriez-vous que la conclusion est robuste ?
